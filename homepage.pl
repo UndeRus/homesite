@@ -9,6 +9,7 @@ plugin 'pod_renderer';
 sub parse_cmd {
   my ($cmd) = @_;
   print $cmd;
+
   my @commands = ('help', 'whoami','ls', 'ls resume',);
   if ($cmd ~~ @commands) {
     if ($cmd eq "whoami") {
@@ -45,18 +46,29 @@ get '/' => sub {
   $self->render('index', inittime => $time);
 };
 
+
 get '/command' => sub {
   my $self = shift;
   my $header = $self->req->headers->header('X-Requested-With');
   my $time = strftime "%H:%M", localtime;
   # AJAX request
   if ($header && $header eq 'XMLHttpRequest') {
+
     my $cmd = $self->param('cmd');
     my $response = parse_cmd($cmd);
       $self->render_json({answer => $response,
 			 time => $time});
+
   }
 };
+
+
+get '/' => sub {
+  my $self = shift;
+  my $time = strftime "%H:%M", localtime;
+  $self->render('index', inittime => $time);
+};
+
 
 app->start;
 
@@ -106,6 +118,7 @@ __DATA__
 		  }
 		  cn.val('');
 		  console.log(hist);
+                  $('div#ct').html("[" +json.time + "]");
 	      });
 	  }
       });
@@ -123,6 +136,7 @@ __DATA__
     }
   input.console{
   border: none;
+  outline: none;
   background-color: black;
   color: white;
       width: 800px;
@@ -147,7 +161,7 @@ __DATA__
   Linux aiur 2.6.38-10-generic #44-Ubuntu SMP Thu Jun 2 21:32:54 UTC 2011 i686 i686 i386 GNU/Linux</div>
   </div>
   </div>
-  <span><span class='tm'>
+  <span><span class='tm' id='ct'>
       [<%= $inittime %>]</span>
   <span class='un'>kerrigan</span>@<span class='hn'>aiur% </span>
   </span><input class="console" name="console"/>
